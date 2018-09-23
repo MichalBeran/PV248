@@ -4,6 +4,21 @@ import sys
 import re
 from collections import Counter
 
+def get_ordinal_number_ending(number):
+    last_digit = re.search(r"\d{1}$", number).group(0)
+    if(last_digit == '1'):
+        return "st"
+    elif(last_digit == '2'):
+        return "nd"
+    elif(last_digit == '3'):
+        return "rd"
+    else:
+        return "th"
+
+def print_collection(counter):
+    for item in counter.most_common():
+        print(str(item[0]) + " - "  + str(item[1]))
+
 def composer(file):
     counter = Counter()
     f = open(file, 'r', encoding='utf8')
@@ -20,8 +35,7 @@ def composer(file):
                 no_spaces = re.sub(r"^\s*", '', no_spaces)
                 if(no_spaces != ''):
                     counter[no_spaces] += 1
-    for composer in counter.most_common():
-        print(str(composer[0]) + " - "  + str(composer[1]))
+    print_collection(counter)
 
 def century(file):
     counter = Counter()
@@ -39,22 +53,16 @@ def century(file):
             # 1732 Paris
             year = re.search(r"\d{4}", m.group(1))
             century_ordinal = re.search(r"\d{1,2}(?:st|nd|rd|th)", m.group(1))
-            # print(m.group(1))
             if year is not None:
                 year = re.match(r"(\d{1,2})(\d{2})", year.group(0))
                 if year is not None:
                     year_century = year.group(1)
                     if year.group(2) != "00":
                         year_century = str(int(year_century) + 1)
-                counter[year_century + "th century"] += 1
-                # print(">>" + year_century)
-            if century_ordinal is not None:
-                # century_ordinal = re.match(r"\d{1,2}", century_ordinal.group(0))
+                counter[year_century + get_ordinal_number_ending(year_century) + " century"] += 1
+            elif century_ordinal is not None:
                 counter[century_ordinal.group(0) + " century"] += 1
-                # print(">>" + century_ordinal.group(0))
-
-    for cent in counter.most_common():
-        print(str(cent[0]) + " - "  + str(cent[1]))
+    print_collection(counter)
 
 if __name__ == "__main__":
 
@@ -64,4 +72,4 @@ if __name__ == "__main__":
         if (sys.argv[2] == "century"):
             century(sys.argv[1])
     else:
-        print("Wrong args")
+        print("Wrong number of arguments")
