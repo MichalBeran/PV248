@@ -17,7 +17,7 @@ def get_ordinal_number_ending(number):
 
 def print_collection(counter):
     for item in counter.most_common():
-        print(str(item[0]) + " - "  + str(item[1]))
+        print(str(item[0]) + ": "  + str(item[1]))
 
 def composer(file):
     counter = Counter()
@@ -28,10 +28,10 @@ def composer(file):
         if m is None:
             continue
         else:
-            no_brackets = re.sub( r"\(.*?\)", '', m.group(1))
-            splited = no_brackets.split(";")
+            splited = m.group(1).split(";")
             for artist in splited:
-                no_spaces = re.sub(r"\s*$", '', artist)
+                no_brackets = re.sub(r"\(.*?\)", '', artist)
+                no_spaces = re.sub(r"\s*$", '', no_brackets)
                 no_spaces = re.sub(r"^\s*", '', no_spaces)
                 if(no_spaces != ''):
                     counter[no_spaces] += 1
