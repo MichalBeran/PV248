@@ -7,11 +7,11 @@ from collections import Counter
 
 def get_ordinal_number_ending(number):
     last_digit = re.search(r"\d{1}$", number).group(0)
-    if(last_digit == '1'):
+    if (last_digit == '1'):
         return "st"
-    elif(last_digit == '2'):
+    elif (last_digit == '2'):
         return "nd"
-    elif(last_digit == '3'):
+    elif (last_digit == '3'):
         return "rd"
     else:
         return "th"
@@ -58,10 +58,9 @@ def century(file):
         if m is None:
             continue
         else:
-            year = re.search(r"\d{4}", m.group(1))
+            year = re.search(r"\d{3,4}", m.group(1))
             century_ordinal = re.search(r"\d{1,2}(?:st|nd|rd|th)", m.group(1))
             if year is not None:
-                year = re.match(r"(\d{1,2})(\d{2})", year.group(0))
                 if year is not None:
                     year_century = get_century_from_year(year.group(0))
                     counter[year_century + get_ordinal_number_ending(year_century) + " century"] += 1
