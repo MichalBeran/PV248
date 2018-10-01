@@ -2,23 +2,51 @@
 import re
 
 
-def parse_people(string):
-    splitted = string.split(';')
+def parse_people(string, splitter):
+    splitted = []
+    if splitter == ',':
+        splitted_first = string.split(',')
+        enum = enumerate(splitted_first)
+        index, item = next(enum, (None, None))
+        while item is not None:
+            person = '' + item
+            index, item = next(enum, (None, None))
+            if item is not None:
+                person += ','
+                person += item
+            splitted.append(person)
+            index, item = next(enum, (None, None))
+        #
+        # for index, item in enumerate(splitted_first):
+        #     person = '' + item
+        #     if(index + 1 < len(splitted_first)):
+        #         person += ','
+        #         index += 1
+        #         person += item
+        #     splitted.append(person)
+    else:
+        splitted = string.split(';')
     result_list = []
     for p in splitted:
         person = Person()
         dates = re.search(r"\((\d{4}|) -- (\d{4}|)\)", p)
+        birth_date = re.search(r"\((\d{4})\s?-.*?\)", p)
+        death_date = re.search(r"\(.*?-\s?(\d{4})\)", p)
         only_birth = re.search(r"\*.*?(\d{4})", p)
         only_death = re.search(r"\+.*?(\d{4})", p)
-        if dates is not None:
-            if dates.group(1) is not None:
-                if dates.group(1) is not '':
-                    person.born = int(dates.group(1))
-            if dates.group(2) is not None:
-                if dates.group(2) is not '':
-                    person.died = int(dates.group(2))
+        # if dates is not None:
+        #     if dates.group(1) is not None:
+        #         if dates.group(1) is not '':
+        #             person.born = int(dates.group(1))
+        #     if dates.group(2) is not None:
+        #         if dates.group(2) is not '':
+        #             person.died = int(dates.group(2))
+        if birth_date is not None:
+            person.born = int(birth_date.group(1))
         elif only_birth is not None:
             person.born = int(only_birth.group(1))
+        if death_date is not None:
+            person.died = int(death_date.group(1))
         elif only_death is not None:
             person.died = int(only_death.group(1))
         person.name = re.sub(r"^\s*", '', re.sub(r"\s*$", '', re.sub(r"\(.*?\)", '', p)))
@@ -43,10 +71,10 @@ def get_people_string(people):
     return '; '.join(str(item) for item in result_list)
 
 
-def match_bool(string):
-    if(string == "yes"):
+def match_boolean(string):
+    if string == 'yes' or string == 'Yes':
         return True
-    if (string == "no"):
+    else:
         return False
 
 
@@ -60,8 +88,8 @@ def load(file):
         for voices_match in re.finditer(r"Voice (.*): ((.*?--.*?)[,|;] (.*)|(.*))", one_print):
             voice = Voice()
             if voices_match.group(5) is not None:
-                voice.name = voices_match.group(4)
-            elif voices_match.group(5) is not None:
+                voice.name = voices_match.group(5)
+            elif voices_match.group(4) is not None:
                 voice.name = voices_match.group(4)
             if voices_match.group(3) is not None:
                 voice.range = voices_match.group(3)
@@ -83,7 +111,7 @@ def load(file):
         composition_year_string = re.search(r"Composition Year: (\d{3,4})", one_print)
         if composition_year_string is not None:
             composition.year = int(composition_year_string.group(1))
-        composition.authors = parse_people(re.search(r"Composer: (.*)", one_print).group(1))
+        composition.authors = parse_people(re.search(r"Composer: (.*)", one_print).group(1), ';')
         composition.voices = voices
         # parse edition
         edition = Edition()
@@ -92,14 +120,14 @@ def load(file):
             edition.name = edition_name_string.group(1)
         authors_string = re.search(r"Editor: (.*)", one_print)
         if authors_string is not None:
-            edition.authors = parse_people(authors_string.group(1))
+            edition.authors = parse_people(authors_string.group(1), ',')
         edition.composition = composition
         # parse print
         print_obj = Print()
         print_obj.print_id = re.sub(r"\(.*?\)", '',
                                 re.sub(r"\s*$", '', re.search(r"Print Number: (.*)", one_print).group(1)))
         print_obj.edition = edition
-        print_obj.partiture = match_bool(re.search(r"Partiture: (.*)", one_print).group(1))
+        print_obj.partiture = match_boolean(re.search(r"Partiture: (yes|no|Yes|No|.*?)", one_print).group(1))
         result_list.append(print_obj)
 
     result_list.sort(key=lambda x: int(x.print_id))
@@ -150,15 +178,23 @@ class Print:
         print("Print Number: " + str(self.print_id))
         print("Composer: " + get_people_string(self.edition.composition.authors))
         print("Title: " + self.edition.composition.name)
+        genre_string = "Genre: "
         if self.edition.composition.genre is not None:
-            print("Genre: " + self.edition.composition.genre)
+            genre_string += self.edition.composition.genre
+        print(genre_string)
+        key_string = "Key: "
         if self.edition.composition.key is not None:
-            print("Key: " + self.edition.composition.key)
+            key_string += self.edition.composition.key
+        print(key_string)
+        composition_year_string = "Composition Year: "
         if self.edition.composition.year is not None:
-            print("Composition Year: " + str(self.edition.composition.year))
+            composition_year_string += str(self.edition.composition.year)
+        print(composition_year_string)
         # print("Publication Year: ")
+        edition_name_string = "Edition: "
         if self.edition.name is not None:
-            print("Edition: " + self.edition.name)
+            edition_name_string += self.edition.name
+        print(edition_name_string)
         print("Editor: " + get_people_string(self.edition.authors))
         index = 1
         for voice in self.edition.composition.voices:
@@ -167,7 +203,7 @@ class Print:
                 voice_string += voice.range
                 if voice.name is not None:
                     voice_string += ', '
-            elif voice.name is not None:
+            if voice.name is not None:
                 voice_string += voice.name
             print("Voice " + str(index) + ": " + voice_string)
             index += 1
@@ -175,6 +211,8 @@ class Print:
             print("Partiture: yes")
         else:
             print("Partiture: no")
+        incipit_string = "Incipit: "
         if self.edition.composition.incipit is not None:
-            print("Incipit: " + self.edition.composition.incipit)
+            incipit_string += self.edition.composition.incipit
+        print(incipit_string)
         print()
