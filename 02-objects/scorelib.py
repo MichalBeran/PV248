@@ -16,31 +16,15 @@ def parse_people(string, splitter):
                 person += item
             splitted.append(person)
             index, item = next(enum, (None, None))
-        #
-        # for index, item in enumerate(splitted_first):
-        #     person = '' + item
-        #     if(index + 1 < len(splitted_first)):
-        #         person += ','
-        #         index += 1
-        #         person += item
-        #     splitted.append(person)
     else:
         splitted = string.split(';')
     result_list = []
     for p in splitted:
         person = Person()
-        dates = re.search(r"\((\d{4}|) -- (\d{4}|)\)", p)
         birth_date = re.search(r"\((\d{4})\s?-.*?\)", p)
         death_date = re.search(r"\(.*?-\s?(\d{4})\)", p)
         only_birth = re.search(r"\*.*?(\d{4})", p)
         only_death = re.search(r"\+.*?(\d{4})", p)
-        # if dates is not None:
-        #     if dates.group(1) is not None:
-        #         if dates.group(1) is not '':
-        #             person.born = int(dates.group(1))
-        #     if dates.group(2) is not None:
-        #         if dates.group(2) is not '':
-        #             person.died = int(dates.group(2))
         if birth_date is not None:
             person.born = int(birth_date.group(1))
         elif only_birth is not None:
