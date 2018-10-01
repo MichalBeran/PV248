@@ -85,7 +85,7 @@ def load(file):
     for one_print in lines.split("\n\n"):
         # parse voices
         voices = []
-        for voices_match in re.finditer(r"Voice (.*): ((.*?--.*?)[,|;] (.*)|(.*))", one_print):
+        for voices_match in re.finditer(r"Voice (.*?): ((.*?--.*?)[,|;] (.*)|(.*))", one_print):
             voice = Voice()
             if voices_match.group(5) is not None:
                 voice.name = voices_match.group(5)
