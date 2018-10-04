@@ -38,7 +38,7 @@ def parse_people(string, splitter):
     return result_list
 
 
-def get_people_string(people):
+def get_people_string(people, separator):
     result_list = []
     for person in people:
         person_string = ""
@@ -52,7 +52,7 @@ def get_people_string(people):
                 person_string += str(person.died)
             person_string += ")"
         result_list.append(person_string)
-    return '; '.join(str(item) for item in result_list)
+    return str(separator).join(str(item) for item in result_list)
 
 
 def match_boolean(string):
@@ -95,7 +95,9 @@ def load(file):
         composition_year_string = re.search(r"Composition Year: (\d{3,4})", one_print)
         if composition_year_string is not None:
             composition.year = int(composition_year_string.group(1))
-        composition.authors = parse_people(re.search(r"Composer: (.*)", one_print).group(1), ';')
+        composer_string = re.search(r"Composer: (.*)", one_print)
+        if composer_string is not None:
+            composition.authors = parse_people(composer_string.group(1), ';')
         composition.voices = voices
         # parse edition
         edition = Edition()
@@ -160,7 +162,7 @@ class Print:
 
     def format(self):
         print("Print Number: " + str(self.print_id))
-        print("Composer: " + get_people_string(self.edition.composition.authors))
+        print("Composer: " + get_people_string(self.edition.composition.authors, '; '))
         print("Title: " + self.edition.composition.name)
         genre_string = "Genre: "
         if self.edition.composition.genre is not None:
@@ -179,7 +181,7 @@ class Print:
         if self.edition.name is not None:
             edition_name_string += self.edition.name
         print(edition_name_string)
-        print("Editor: " + get_people_string(self.edition.authors))
+        print("Editor: " + get_people_string(self.edition.authors, ', '))
         index = 1
         for voice in self.edition.composition.voices:
             voice_string = ''
