@@ -108,8 +108,8 @@ def load(file):
         edition.composition = composition
         # parse print
         print_obj = Print()
-        print_obj.print_id = re.sub(r"\(.*?\)", '',
-                                re.sub(r"\s*$", '', re.search(r"Print Number: (.*)", one_print).group(1)))
+        print_obj.print_id = int(re.sub(r"\(.*?\)", '',
+                                re.sub(r"\s*$", '', re.search(r"Print Number: (.*)", one_print).group(1))))
         print_obj.edition = edition
         print_obj.partiture = match_boolean(re.search(r"Partiture: (yes|no|Yes|No|.*?)", one_print).group(1))
         result_list.append(print_obj)
