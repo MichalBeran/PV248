@@ -67,6 +67,10 @@ def load(file):
     lines = f.read()
     result_list = []
     for one_print in lines.split("\n\n"):
+        if one_print is None:
+            break
+        if one_print == '' or one_print == ' ':
+            break
         # parse voices
         voices = []
         for voices_match in re.finditer(r"Voice (.*?): ((.*?--.*?)[,|;] (.*)|(.*))", one_print):
