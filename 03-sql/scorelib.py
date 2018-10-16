@@ -78,7 +78,7 @@ def load(file):
             if voices_match.group(1) is not None:
                 voice.number = int(voices_match.group(1))
             if voices_match.group(5) is not None:
-                voice.name = voices_match.group(5)
+                voice.name = voices_match.group(5).strip(' ')
             elif voices_match.group(4) is not None:
                 voice.name = voices_match.group(4).strip(' ')
             if voices_match.group(3) is not None:

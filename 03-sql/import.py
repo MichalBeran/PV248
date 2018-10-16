@@ -105,14 +105,10 @@ def save_to_db(file, db):
         # import edition
         edition = item.edition
         select_edition = cur.execute('SELECT id FROM edition WHERE name=? AND score=?', (edition.name, composition_id, )).fetchone()
-        # edition_id = cur.execute('INSERT INTO edition (score, name, year) VALUES (?, ?, ?)',
-        #                          (composition_id, edition.name, None)).lastrowid
-
         if select_edition is None:
             edition_id = cur.execute('INSERT INTO edition (score, name, year) VALUES (?, ?, ?)',
                                      (composition_id, edition.name, None)).lastrowid
         else:
-            # print('duplicite edition', select_edition[0], edition.name)
             edition_id = select_edition[0]
 
         # import editors
