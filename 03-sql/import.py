@@ -145,7 +145,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) == 3:
         # only for tests
-        os.remove(str(sys.argv[2]))
+        # os.remove(str(sys.argv[2]))
         # only for tests
         save_to_db(sys.argv[1], sys.argv[2])
     else:
