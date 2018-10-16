@@ -80,7 +80,7 @@ def load(file):
             if voices_match.group(5) is not None:
                 voice.name = voices_match.group(5)
             elif voices_match.group(4) is not None:
-                voice.name = voices_match.group(4)
+                voice.name = voices_match.group(4).strip(' ')
             if voices_match.group(3) is not None:
                 voice.range = voices_match.group(3)
             voices.append(voice)
@@ -88,16 +88,16 @@ def load(file):
         composition = Composition()
         composition_name_string = re.search(r"Title: (.*)", one_print)
         if composition_name_string is not None:
-            composition.name = composition_name_string.group(1)
+            composition.name = composition_name_string.group(1).strip(' ')
         incipit_string = re.search(r"Incipit: (.*)", one_print)
         if incipit_string is not None:
-            composition.incipit = incipit_string.group(1)
+            composition.incipit = incipit_string.group(1).strip(' ')
         key_string = re.search(r"Key: (.*)", one_print)
         if key_string is not None:
-            composition.key = key_string.group(1)
+            composition.key = key_string.group(1).strip(' ')
         genre_string = re.search(r"Genre: (.*)", one_print)
         if genre_string is not None:
-            composition.genre = genre_string.group(1)
+            composition.genre = genre_string.group(1).strip(' ')
         composition_year_string = re.search(r"Composition Year: (\d{3,4})", one_print)
         if composition_year_string is not None:
             composition.year = int(composition_year_string.group(1))
@@ -109,7 +109,7 @@ def load(file):
         edition = Edition()
         edition_name_string = re.search(r"Edition: (.*)", one_print)
         if edition_name_string is not None:
-            edition.name = edition_name_string.group(1)
+            edition.name = edition_name_string.group(1).strip(' ')
         authors_string = re.search(r"Editor: (.*)", one_print)
         if authors_string is not None:
             edition.authors = parse_people(authors_string.group(1), ',')

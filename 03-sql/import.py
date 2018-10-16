@@ -70,19 +70,12 @@ def save_to_db(file, db):
         select_composition = cur.execute(
             select_composition_query,
             select_composition_params).fetchone()
-        # print(select_composition, 'first')
-        select_composition1 = cur.execute(
-            'SELECT id FROM score WHERE name=? AND genre=? AND key=? AND incipit=? AND year=? ',
-            (composition.name, composition.genre, composition.key, composition.incipit, composition.year, )).fetchone()
-        # print(select_composition1, "second")
         if select_composition is not None:
-            # print("composition duplication")
             composition_id = select_composition[0]
         else:
             composition_id = cur.execute('INSERT INTO score (name, genre, key, incipit, year) VALUES (?, ?, ?, ?, ?)',
                                      (composition.name, composition.genre, composition.key, composition.incipit,
                                       composition.year)).lastrowid
-        # print(composition.name, composition_id)
         # import composition authors
         authors = item.edition.composition.authors
         for author in authors:
