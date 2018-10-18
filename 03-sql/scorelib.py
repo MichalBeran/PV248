@@ -34,7 +34,9 @@ def parse_people(string, splitter):
         elif only_death is not None:
             person.died = int(only_death.group(1))
         person.name = re.sub(r"^\s*", '', re.sub(r"\s*$", '', re.sub(r"\(.*?\)", '', p)))
-        result_list.append(person)
+        if person.name is not None:
+            if person.name != '':
+                result_list.append(person)
     return result_list
 
 
