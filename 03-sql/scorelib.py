@@ -165,7 +165,7 @@ class Edition:
     def __init__(self):
         self.composition = Composition()
         self.authors = []
-        self.name = ""
+        self.name = None
 
 
 class Print:
