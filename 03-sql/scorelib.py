@@ -34,7 +34,9 @@ def parse_people(string, splitter):
         elif only_death is not None:
             person.died = int(only_death.group(1))
         person.name = re.sub(r"^\s*", '', re.sub(r"\s*$", '', re.sub(r"\(.*?\)", '', p)))
-        result_list.append(person)
+        if person.name is not None:
+            if person.name != '':
+                result_list.append(person)
     return result_list
 
 
@@ -78,26 +80,33 @@ def load(file):
             if voices_match.group(1) is not None:
                 voice.number = int(voices_match.group(1))
             if voices_match.group(5) is not None:
-                voice.name = voices_match.group(5).strip(' ')
+                if voices_match.group(5).strip(' ') != '':
+                    voice.name = voices_match.group(5).strip(' ')
             elif voices_match.group(4) is not None:
-                voice.name = voices_match.group(4).strip(' ')
+                if voices_match.group(4).strip(' ') != '':
+                    voice.name = voices_match.group(4).strip(' ')
             if voices_match.group(3) is not None:
-                voice.range = voices_match.group(3)
+                if voices_match.group(3) != '':
+                    voice.range = voices_match.group(3)
             voices.append(voice)
         # parse composition
         composition = Composition()
         composition_name_string = re.search(r"Title: (.*)", one_print)
         if composition_name_string is not None:
-            composition.name = composition_name_string.group(1).strip(' ')
+            if composition_name_string.group(1).strip(' ') != '':
+                composition.name = composition_name_string.group(1).strip(' ')
         incipit_string = re.search(r"Incipit: (.*)", one_print)
         if incipit_string is not None:
-            composition.incipit = incipit_string.group(1).strip(' ')
+            if incipit_string.group(1).strip(' ') != '':
+                composition.incipit = incipit_string.group(1).strip(' ')
         key_string = re.search(r"Key: (.*)", one_print)
         if key_string is not None:
-            composition.key = key_string.group(1).strip(' ')
+            if key_string.group(1).strip(' ') != '':
+                composition.key = key_string.group(1).strip(' ')
         genre_string = re.search(r"Genre: (.*)", one_print)
         if genre_string is not None:
-            composition.genre = genre_string.group(1).strip(' ')
+            if genre_string.group(1).strip(' ') != '':
+                composition.genre = genre_string.group(1).strip(' ')
         composition_year_string = re.search(r"Composition Year: (\d{3,4})", one_print)
         if composition_year_string is not None:
             composition.year = int(composition_year_string.group(1))
@@ -109,7 +118,8 @@ def load(file):
         edition = Edition()
         edition_name_string = re.search(r"Edition: (.*)", one_print)
         if edition_name_string is not None:
-            edition.name = edition_name_string.group(1).strip(' ')
+            if edition_name_string.group(1).strip(' ') != '':
+                edition.name = edition_name_string.group(1).strip(' ')
         authors_string = re.search(r"Editor: (.*)", one_print)
         if authors_string is not None:
             edition.authors = parse_people(authors_string.group(1), ',')
@@ -155,7 +165,7 @@ class Edition:
     def __init__(self):
         self.composition = Composition()
         self.authors = []
-        self.name = ""
+        self.name = None
 
 
 class Print:
