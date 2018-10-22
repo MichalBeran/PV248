@@ -43,9 +43,13 @@ def save_to_db(file, db):
     for item in list:
         # import composition / score
         composition = item.edition.composition
-        select_composition_query = 'SELECT id FROM score WHERE name=?'
+        select_composition_query = 'SELECT id FROM score WHERE'
         select_composition_params = []
-        select_composition_params.append(composition.name)
+        if composition.name is not None:
+            select_composition_query += ' name=?'
+            select_composition_params.append(composition.name)
+        else:
+            select_composition_query += ' name is null'
         if composition.genre is not None:
             select_composition_query += ' AND genre=?'
             select_composition_params.append(composition.genre)
@@ -104,7 +108,11 @@ def save_to_db(file, db):
                                     (voice.number, composition_id, voice.range, voice.name)).lastrowid
         # import edition
         edition = item.edition
-        select_edition = cur.execute('SELECT id FROM edition WHERE name=? AND score=?', (edition.name, composition_id, )).fetchone()
+        if edition.name is None:
+            select_edition = cur.execute('SELECT id FROM edition WHERE name is null AND score=?',
+                                         (composition_id,)).fetchone()
+        else:
+            select_edition = cur.execute('SELECT id FROM edition WHERE name=? AND score=?', (edition.name, composition_id, )).fetchone()
         if select_edition is None:
             edition_id = cur.execute('INSERT INTO edition (score, name, year) VALUES (?, ?, ?)',
                                      (composition_id, edition.name, None)).lastrowid
