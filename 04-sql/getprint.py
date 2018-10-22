@@ -22,7 +22,7 @@ def search_composers(print_id):
             if person[2] is not None:
                 item["died"] = person[2]
             items.append(item)
-    print(json.dumps(items, ensure_ascii=False, indent=4))
+    print(json.dumps(items, ensure_ascii=False, sort_keys=True, indent=4))
 
 if __name__ == "__main__":
 

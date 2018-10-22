@@ -8,24 +8,27 @@ def search(name):
     conn = sqlite3.connect('scorelib.dat')
     cur = conn.cursor()
     res = cur.execute('SELECT * FROM person WHERE name like ?', ("%" + name + "%",)).fetchall()
-    people = []
+    people = {}
     if res is not None:
         for person in res:
             person_item = {}
-            print(person)
+            # print(person)
             prints_info = cur.execute('SELECT print.id, print.partiture, score.id, edition.id FROM person '
                           'JOIN score_author on person.id = score_author.composer '
                           'JOIN edition on edition.score = score_author.score '
                           'JOIN score on score.id = edition.score '
                           'JOIN print on edition.id = print.edition WHERE person.id = ?',
                           (person[0],)).fetchall()
-            print(prints_info)
+            # print(prints_info)
             prints = []
             if prints_info is not None:
                 for print_info_item in prints_info:
                     print_item = {}
                     print_item["Print Number"] = print_info_item[0]
-                    print_item["Partiture"] = print_info_item[1]
+                    if print_info_item[1] == 'Y':
+                        print_item["Partiture"] = True
+                    else:
+                        print_item["Partiture"] = False
                     composition_info_item = cur.execute('SELECT * FROM score WHERE id=?',
                                                         (print_info_item[2],)).fetchone()
                     edition_info_item = cur.execute('SELECT * FROM edition WHERE id=?',
@@ -56,7 +59,7 @@ def search(name):
                             if composer_info_item[2] is not None:
                                 composer_item["Died"] = composer_info_item[2]
                             composers.append(composer_item)
-                        print_item["Composers"] = composers
+                        print_item["Composer"] = composers
                     editor_info_items = cur.execute(
                         'SELECT * FROM person JOIN edition_author on person.id = edition_author.editor '
                         'WHERE edition_author.edition=?', (print_info_item[3],)).fetchall()
@@ -70,7 +73,7 @@ def search(name):
                             if editor_info_item[2] is not None:
                                 editor_item["Died"] = editor_info_item[2]
                             editors.append(editor_item)
-                        print_item["Editors"] = editors
+                        print_item["Editor"] = editors
                     voice_info_items = cur.execute(
                         'SELECT * FROM voice WHERE score=?', (print_info_item[2],)).fetchall()
                     if voice_info_items is not None:
@@ -85,9 +88,9 @@ def search(name):
                         print_item["Voices"] = voices
                     prints.append(print_item)
             person_item[person[3]] = prints
-            people.append(person_item)
+            people[person[3]] = prints
 
-    print(json.dumps(people, ensure_ascii=False, indent=4))
+    print(json.dumps(people, ensure_ascii=False, sort_keys=True, indent=4))
 
 if __name__ == "__main__":
 
