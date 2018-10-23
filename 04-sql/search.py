@@ -11,7 +11,6 @@ def search(name):
     people = {}
     if res is not None:
         for person in res:
-            person_item = {}
             # print(person)
             prints_info = cur.execute('SELECT print.id, print.partiture, score.id, edition.id FROM person '
                           'JOIN score_author on person.id = score_author.composer '
@@ -87,7 +86,6 @@ def search(name):
                             voices[voice_info_item[1]] = voice_item
                         print_item["Voices"] = voices
                     prints.append(print_item)
-            person_item[person[3]] = prints
             people[person[3]] = prints
 
     print(json.dumps(people, ensure_ascii=False, sort_keys=True, indent=4))
