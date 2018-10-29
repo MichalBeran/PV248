@@ -51,8 +51,8 @@ def solve(input):
     if rank1 != rank2:
         print('No solution')
     else:
-        if rank1 < (len(dict.keys()) -1):
-            dimension = len(dict.keys())-1-rank1
+        if rank1 < (len(dict.keys())):
+            dimension = len(dict.keys())-rank1
             print('Solution space dimension: ', dimension)
         else:
             # res = np.linalg.det(a)
@@ -60,7 +60,7 @@ def solve(input):
             x = np.linalg.solve(a.T,b)
             index = 0
             for key in dict.keys():
-                print(key, ' = ', int(x[index]), end=', ', flush=True)
+                print(key, ' = ', x[index], end=', ', flush=True)
 
 
         # iterator = iter(line.split(" "))
