@@ -138,14 +138,32 @@ def save_to_db(file, db):
         edition = item.edition
         if edition.name is None:
             select_edition = cur.execute('SELECT id FROM edition WHERE name is null AND score=?',
-                                         (composition_id,)).fetchone()
+                                         (composition_id,)).fetchall()
         else:
-            select_edition = cur.execute('SELECT id FROM edition WHERE name=? AND score=?', (edition.name, composition_id, )).fetchone()
+            select_edition = cur.execute('SELECT id FROM edition WHERE name=? AND score=?',
+                                         (edition.name, composition_id, )).fetchall()
+        edition_id = None
         if select_edition is None:
+            if len(select_edition) > 0:
+                for selected_edition in select_edition:
+                    difference = False
+                    edition_editors = cur.execute('SELECT person.name FROM person JOIN edition_author on '
+                                                  'person.id = edition_author.editor WHERE edition_author.edition=?',
+                                                  (selected_edition[0], )).fetchall()
+                    if len(edition_editors) == len(edition.authors):
+                        index = 0
+                        while index < len(edition.authors):
+                            if edition_editors[index][0] != edition.authors[index].name:
+                                difference = True
+                            index += 1
+                    else:
+                        difference = True
+                    if not difference:
+                        edition_id = selected_edition[0]
+
+        if edition_id is None:
             edition_id = cur.execute('INSERT INTO edition (score, name, year) VALUES (?, ?, ?)',
                                      (composition_id, edition.name, None)).lastrowid
-        else:
-            edition_id = select_edition[0]
 
         # import editors
         editors = item.edition.authors
