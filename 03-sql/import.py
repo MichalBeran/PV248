@@ -71,12 +71,40 @@ def save_to_db(file, db):
         else:
             select_composition_query += ' AND year is null'
 
+        composition_id = None
         select_composition = cur.execute(
             select_composition_query,
-            select_composition_params).fetchone()
+            select_composition_params).fetchall()
         if select_composition is not None:
-            composition_id = select_composition[0]
-        else:
+            if len(select_composition) > 0:
+                for selected_composition in select_composition:
+                    difference = False
+                    composition_voices = cur.execute('SELECT number, range, name FROM voice WHERE score=?',
+                                                     (selected_composition[0], )).fetchall()
+                    if len(composition_voices) == len(composition.voices):
+                        index = 0
+                        while index < len(composition.voices):
+                            if composition_voices[index][0] != composition.voices[index].number or composition_voices[index][1] != composition.voices[index].range or composition_voices[index][2] != composition.voices[index].name:
+                                difference = True
+                            index += 1
+                    else:
+                        difference = True
+                    composition_composers = cur.execute('SELECT person.name FROM person JOIN score_author on '
+                                                        'person.id = score_author.composer WHERE score_author.score=?',
+                                                     (selected_composition[0], )).fetchall()
+                    if len(composition_composers) == len(composition.authors):
+                        index = 0
+                        while index < len(composition.authors):
+                            if composition_composers[index][0] != composition.authors[index].name:
+                                difference = True
+                            index += 1
+                    else:
+                        difference = True
+                    if not difference:
+                        composition_id = selected_composition[0]
+                        # print(composition.name, composition_id)
+
+        if composition_id is None:
             composition_id = cur.execute('INSERT INTO score (name, genre, key, incipit, year) VALUES (?, ?, ?, ?, ?)',
                                      (composition.name, composition.genre, composition.key, composition.incipit,
                                       composition.year)).lastrowid
@@ -153,7 +181,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) == 3:
         # only for tests
-        # os.remove(str(sys.argv[2]))
+        os.remove(str(sys.argv[2]))
         # only for tests
         save_to_db(sys.argv[1], sys.argv[2])
     else:
