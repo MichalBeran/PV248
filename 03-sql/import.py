@@ -143,9 +143,10 @@ def save_to_db(file, db):
             select_edition = cur.execute('SELECT id FROM edition WHERE name=? AND score=?',
                                          (edition.name, composition_id, )).fetchall()
         edition_id = None
-        if select_edition is None:
+        if select_edition is not None:
             if len(select_edition) > 0:
                 for selected_edition in select_edition:
+
                     difference = False
                     edition_editors = cur.execute('SELECT person.name FROM person JOIN edition_author on '
                                                   'person.id = edition_author.editor WHERE edition_author.edition=?',
@@ -199,7 +200,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) == 3:
         # only for tests
-        os.remove(str(sys.argv[2]))
+        # os.remove(str(sys.argv[2]))
         # only for tests
         save_to_db(sys.argv[1], sys.argv[2])
     else:
