@@ -40,28 +40,32 @@ def solve(input):
     # print(dict)
 
     a = np.empty((0, line_number))
-    for (key, value) in dict.items():
-        a = np.append(a, [np.array(value)], axis=0)
+    for key in sorted(dict):
+        a = np.append(a, [np.array(dict[key])], axis=0)
     b = np.array(results)
-
-    # print(a)
-    # print(a.T)
+    a = a.T
+    # c = np.concatenate((a, b[:, None]), axis=1)
+    # print(c)
     rank1 = np.linalg.matrix_rank(a)
-    rank2 = np.linalg.matrix_rank(np.append(a, [np.array(b)], axis=0))
+    rank2 = np.linalg.matrix_rank(np.concatenate((a, b[:, None]), axis=1))
     if rank1 != rank2:
-        print('No solution')
+        print('no solution')
     else:
         if rank1 < (len(dict.keys())):
             dimension = len(dict.keys())-rank1
-            print('Solution space dimension: ', dimension)
+            print('solution space dimension: ', dimension)
         else:
             # res = np.linalg.det(a)
             # print(res)
-            x = np.linalg.solve(a.T,b)
+            x = np.linalg.solve(a,b)
+            print('solution: ', end='')
             index = 0
-            for key in dict.keys():
-                print(key, ' = ', x[index], end=', ', flush=True)
-
+            for key in sorted(dict):
+                print(key, ' = ', x[index], end='', flush=True)
+                if index < len(dict.keys()) - 1:
+                    print(end=', ')
+                index += 1
+            print()
 
         # iterator = iter(line.split(" "))
         # item = next(iterator, None)
