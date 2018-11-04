@@ -1,45 +1,54 @@
 #!/usr/bin/python3
 import sys
 import numpy as np
+import re
 
 
 def solve(input):
     f = open(input, 'r', encoding='utf8')
     dict = {}
     results = []
-    line_number = 0
     for line in f:
-        operand = None
-        for one in line.split(" "):
-            if one == '+' or one == '-' or one == '=':
-                operand = one
+        number = 1
+        for match in re.finditer(r"([+,\-,=]) (\d*)([a-z]*)|(\d*)([a-z])", line):
+            if match.group(1) is None:
+                if match.group(5) is not None:
+                    if match.group(5) not in dict:
+                        dict[match.group(5)] = []
+                        for i in range(0, len(results)):
+                            dict[match.group(5)].append(0)
+                    if match.group(4) is None:
+                        number = 1
+                    else:
+                        if match.group(4) == '':
+                            number = 1
+                        else:
+                            number = int(match.group(4))
+                    dict[match.group(5)].append(number)
             else:
-                if operand != '=':
-                    number = one[:-1]
-                    if number is None:
-                        number = 1
-                    elif number == '':
-                        number = 1
+                if match.group(1) == '+' or match.group(1) == '-':
+                    if match.group(3) not in dict:
+                        dict[match.group(3)] = []
+                        for i in range(0, len(results)):
+                            dict[match.group(3)].append(0)
+                    if match.group(2) is None:
+                        number = int(match.group(1) + '' + '1')
                     else:
-                        number = int(number)
-                    coeficient = one[-1:]
-                    if coeficient not in dict:
-                        dict[coeficient] = []
-                        for i in range(0, line_number):
-                            dict[coeficient].append(0)
-                    if operand == '-':
-                        dict[coeficient].append(int(operand + str(number)))
-                    else:
-                        dict[coeficient].append(number)
+                        if match.group(2) == '':
+                            number = int(match.group(1) + '' + '1')
+                        else:
+                            number = int(match.group(1) + '' + match.group(2))
+                    dict[match.group(3)].append(number)
                 else:
-                    results.append(int(one))
-        line_number += 1
+                    results.append(int(match.group(2)))
         for (key, value) in dict.items():
-            if len(value) < line_number:
+            if len(value) < len(results):
                 value.append(0)
-    # print(dict)
 
-    a = np.empty((0, line_number))
+    # print(dict)
+    # print(results)
+
+    a = np.empty((0, len(results)))
     for key in sorted(dict):
         a = np.append(a, [np.array(dict[key])], axis=0)
     b = np.array(results)
