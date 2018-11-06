@@ -58,18 +58,11 @@ def peaks(file):
         end = start + n
         data_window = integer_data[start:end]
         fft_res = np.abs(np.fft.rfft(a=data_window, n=int(n)))
-        # freqs = np.fft.rfftfreq(len(data_window))
-        # freqs = freqs * frame_rate
-        freqs = np.arange((len(data_window) / 2) + 1) / (float(len(data_window)) / frame_rate)
-        # freqs = np.arange((n / 2) + 1) / (float(n) / frame_rate)
-        # print('data window len:', len(data_window))
-        # print('fft len:', len(fft_res))
-        # print('freqs len:', len(freqs))
         window_avg = sum(fft_res) / len(fft_res)
         # print('window_avg:', window_avg)
         for i in range(0, len(fft_res)):
             if fft_res[i] >= 20 * window_avg:
-                freq = freqs[i]
+                freq = i
                 if low is not None:
                     if freq < low:
                         low = freq
@@ -83,20 +76,8 @@ def peaks(file):
     if low is None or high is None:
         print('no peaks')
     else:
-        print('low = ', int(low), end='')
-        print(', high = ', int(high))
-
-    # print('ints:', integer_data)
-    # res = np.abs(np.fft.rfft(integer_data, int(total_samples/2)))
-    # avg = sum(res) / len(res)
-    # print('res:',res)
-    # print(avg)
-    # print(len(res))
-    # for amp in res:
-    #     if amp > 20 * avg:
-    #         print(amp)
-    # np.rfft()
-
+        print('low =', int(low), end='')
+        print(', high =', int(high))
 
 
 if __name__ == "__main__":
