@@ -62,7 +62,7 @@ def solve(input):
     else:
         if rank1 < (len(dict.keys())):
             dimension = len(dict.keys())-rank1
-            print('solution space dimension: ', dimension)
+            print('solution space dimension:', dimension)
         else:
             # res = np.linalg.det(a)
             # print(res)
