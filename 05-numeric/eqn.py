@@ -10,7 +10,7 @@ def solve(input):
     results = []
     for line in f:
         number = 1
-        for match in re.finditer(r"([+,\-,=]) (\d*)([a-z]*)|(\d*)([a-z])", line):
+        for match in re.finditer(r"([+\-=]) (\d*)([a-z]*)|(\d*)([a-z])", line):
             if match.group(1) is None:
                 if match.group(5) is not None:
                     if match.group(5) not in dict:
