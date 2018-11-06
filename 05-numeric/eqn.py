@@ -70,7 +70,7 @@ def solve(input):
             print('solution: ', end='')
             index = 0
             for key in sorted(dict):
-                print(key, ' = ', x[index], end='', flush=True)
+                print(key, '=', x[index], end='', flush=True)
                 if index < len(dict.keys()) - 1:
                     print(end=', ')
                 index += 1
