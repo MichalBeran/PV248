@@ -36,6 +36,10 @@ def get_tone(a_reference, frequency):
     if cents > 50:
         cents = cents - 100
         tone = tone + 1
+        tone = tone % 12
+    if tone > 2:
+        tone = tone - 12
+        octave_shift += 1
     if not steps_up:
         cents = cents * (-1)
         tone = tone * (-1)
@@ -52,7 +56,7 @@ def get_tone(a_reference, frequency):
     if octave_shift > 0:
         tone_label = tone_label + '’'
     cents_string = str(cents)
-    if cents > 0:
+    if cents >= 0:
         cents_string = '+' + cents_string
     return tone_label + cents_string
 
@@ -142,8 +146,7 @@ def music(a_reference, file):
             last_segment.end_time = float("{:.2f}".format((index * window_shift_time) + window_shift_time))
             # print('updated:', last_segment.end_time)
         else:
-            if len(last_segment.peaks) > 0:
-                print_segment(last_segment, a_reference)
+            print_segment(last_segment, a_reference)
             last_segment = Segment()
             last_segment.start_time = segment.start_time
             last_segment.end_time = segment.end_time
@@ -152,15 +155,16 @@ def music(a_reference, file):
 
 
 def print_segment(segment, a_reference):
-    if segment.start_time < 10.0:
-        print(str(0), end='')
-    print(segment.start_time, '-', end='', sep='')
-    if segment.end_time < 10.0:
-        print(str(0), end='')
-    print(segment.end_time, end=' ')
-    for p in sorted(segment.peaks):
-        print(get_tone(int(a_reference), p), end=' ')
-    print()
+    if len(segment.peaks) > 0:
+        if segment.start_time < 10.0:
+            print(str(0), end='')
+        print(segment.start_time, '-', end='', sep='')
+        if segment.end_time < 10.0:
+            print(str(0), end='')
+        print(segment.end_time, end=' ')
+        for p in sorted(segment.peaks):
+            print(get_tone(int(a_reference), p), end=' ')
+        print()
 
 
 if __name__ == "__main__":
