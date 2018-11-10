@@ -80,7 +80,7 @@ def music(a_reference, file):
     # print('number of frames:', num_frames)
     # print('number of channels:', num_channels)
 
-    max_cluster_deviaion = 8  # max cluster deviation in Hz
+    max_cluster_deviaion = 1  # max cluster deviation in Hz
     window_shift_time = 0.1
     window_shift = (window_shift_time * frame_rate)
     p = 1
