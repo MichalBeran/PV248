@@ -16,8 +16,10 @@ class Segment:
     def __eq__(self, other):
         if len(self.peaks) != len(other.peaks):
             return False
+        this_peaks = sorted(self.peaks)
+        other_peaks = sorted(other.peaks)
         for index in range(0, len(self.peaks)):
-            if self.peaks[index] != other.peaks[index]:
+            if this_peaks[index] != other_peaks[index]:
                 return False
         return True
 
@@ -39,12 +41,13 @@ def get_tone(a_reference, frequency):
         tone = tone % 12
     if tone > 2:
         tone = tone - 12
-        octave_shift += 1
+        # octave_shift += 1
     if not steps_up:
         cents = cents * (-1)
         tone = tone * (-1)
         octave_shift = octave_shift * (-1)
     tone_label = tones[tone]
+
     if octave_shift < -1:
         tone_label = tone_label.capitalize()
     while octave_shift < -2:
@@ -121,9 +124,6 @@ def music(a_reference, file):
         end = (start + n)
         segment.start_time = float("{0:.2f}".format(index * window_shift_time))
         segment.end_time = float("{0:.2f}".format(segment.start_time + window_shift_time))
-        if start == 0:
-            last_segment = segment
-
         # print('start:', start, 'end:', end)
         data_window = integer_data[start:end]
         fft_res = np.abs(np.fft.rfft(a=data_window, n=int(n)))
@@ -147,7 +147,8 @@ def music(a_reference, file):
             if add_peak:
                 if len(segment.peaks) < 3:
                     segment.peaks.append(peak_dict[amplitude])
-
+        if start == 0:
+            last_segment = segment
         if last_segment.__eq__(segment):
             last_segment.end_time = float("{:.2f}".format((index * window_shift_time) + window_shift_time))
             # print('updated:', last_segment.end_time)
@@ -177,5 +178,6 @@ if __name__ == "__main__":
 
     if len(sys.argv) == 3:
         music(sys.argv[1], sys.argv[2])
+        # print(get_tone(int(sys.argv[1]), int(sys.argv[2])))
     else:
         print("Wrong number of arguments")
