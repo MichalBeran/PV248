@@ -47,14 +47,20 @@ def get_tone(a_reference, frequency):
     tone_label = tones[tone]
     if octave_shift < -1:
         tone_label = tone_label.capitalize()
-    if octave_shift < -2:
+    while octave_shift < -2:
         tone_label = tone_label + ','
-    if octave_shift < -3:
-        tone_label = tone_label + ','
-    if octave_shift > -1:
+        octave_shift += 1
+    # if octave_shift < -2:
+    #     tone_label = tone_label + ','
+    # if octave_shift < -3:
+    #     tone_label = tone_label + ','
+    while octave_shift > -1:
         tone_label = tone_label + '’'
-    if octave_shift > 0:
-        tone_label = tone_label + '’'
+        octave_shift -= 1
+    # if octave_shift > -1:
+    #     tone_label = tone_label + '’'
+    # if octave_shift > 0:
+    #     tone_label = tone_label + '’'
     cents_string = str(cents)
     if cents >= 0:
         cents_string = '+' + cents_string
