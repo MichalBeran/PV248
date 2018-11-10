@@ -33,37 +33,35 @@ def get_tone(a_reference, frequency):
     steps = np.abs(steps)
     octave_shift = int(steps // 12)
     tone = int(steps % 12)
-    cents = float("{0:.2f}".format((steps - tone) % 12))
-    cents = int(cents * 100)
+    cents = float((steps - tone) % 12)
+    cents = int(round(cents * 100))
     if cents > 50:
         cents = cents - 100
         tone = tone + 1
-        tone = tone % 12
-    if tone > 2:
-        tone = tone - 12
-        # octave_shift += 1
+        # tone = tone % 12
+        if tone > 11:
+            tone = tone % 12
+            octave_shift += 1
+    if steps_up:
+        if tone > 2:
+            tone = tone - 12
+            octave_shift += 1
     if not steps_up:
+        if tone > 9:
+            tone = tone - 12
+            octave_shift += 1
         cents = cents * (-1)
         tone = tone * (-1)
         octave_shift = octave_shift * (-1)
     tone_label = tones[tone]
-
     if octave_shift < -1:
         tone_label = tone_label.capitalize()
     while octave_shift < -2:
         tone_label = tone_label + ','
         octave_shift += 1
-    # if octave_shift < -2:
-    #     tone_label = tone_label + ','
-    # if octave_shift < -3:
-    #     tone_label = tone_label + ','
     while octave_shift > -1:
         tone_label = tone_label + '’'
         octave_shift -= 1
-    # if octave_shift > -1:
-    #     tone_label = tone_label + '’'
-    # if octave_shift > 0:
-    #     tone_label = tone_label + '’'
     cents_string = str(cents)
     if cents >= 0:
         cents_string = '+' + cents_string
@@ -142,7 +140,7 @@ def music(a_reference, file):
             # print(amplitude)
             # print(peak_dict[amplitude])
             for peak in segment.peaks:
-                if np.abs(peak_dict[amplitude] - peak) < max_cluster_deviaion:
+                if np.abs(peak_dict[amplitude] - peak) <= max_cluster_deviaion:
                     add_peak = False
             if add_peak:
                 if len(segment.peaks) < 3:
