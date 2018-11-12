@@ -24,6 +24,31 @@ class Segment:
         return True
 
 
+class Cluster:
+    def __init__(self):
+        self.start_frequency = 0
+        self.end_frequency = 0
+        self.max_amplitude = 0.0
+        self.frequency_of_max_amplitude = 0
+        self.hertz_deviation = 1
+
+    def contains_cluster(self, other_cluster):
+        return (other_cluster.end_frequency <= (self.end_frequency + self.hertz_deviation) and other_cluster.start_frequency >= (self.start_frequency - self.hertz_deviation))
+
+    def append_cluster(self, other_cluster):
+        if self.contains_cluster(other_cluster):
+            if other_cluster.start_frequency < self.start_frequency:
+                self.start_frequency = other_cluster.start_frequency
+                if other_cluster.max_amplitude > self.max_amplitude:
+                    self.max_amplitude = other_cluster.max_amplitude
+                    self.frequency_of_max_amplitude = other_cluster.frequency_of_max_amplitude
+            if other_cluster.end_frequency > self.end_frequency:
+                self.end_frequency = other_cluster.end_frequency
+                if other_cluster.max_amplitude > self.max_amplitude:
+                    self.max_amplitude = other_cluster.max_amplitude
+                    self.frequency_of_max_amplitude = other_cluster.frequency_of_max_amplitude
+
+
 def get_tone(a_reference, frequency):
     tones = ['a', 'bes', 'b', 'c', 'cis', 'd', 'es', 'e', 'f', 'fis', 'g', 'gis']
     steps = math.log((frequency / a_reference), math.pow(2, (1/12)))
@@ -66,6 +91,27 @@ def get_tone(a_reference, frequency):
     if cents >= 0:
         cents_string = '+' + cents_string
     return tone_label + cents_string
+
+
+def get_clustered_peaks(peak_dict):
+    cluster_array = []
+    for frequency in sorted(peak_dict):
+        cluster = Cluster()
+        cluster.start_frequency = frequency
+        cluster.end_frequency = frequency
+        cluster.max_amplitude = peak_dict[frequency]
+        cluster.frequency_of_max_amplitude = frequency
+        add_cluster = True
+        for clust in cluster_array:
+            if clust.contains_cluster(cluster):
+                clust.append_cluster(cluster)
+                add_cluster = False
+        if add_cluster:
+            cluster_array.append(cluster)
+    result_dict = {}
+    for cluster in cluster_array:
+        result_dict[cluster.max_amplitude] = cluster.frequency_of_max_amplitude
+    return result_dict
 
 
 def music(a_reference, file):
@@ -130,21 +176,11 @@ def music(a_reference, file):
         peak_dict = {}
         for i in range(0, len(fft_res)):
             if fft_res[i] >= 20 * window_avg:
-                freq = i
-                peak_dict[fft_res[i]] = i
-                # print('freq', i)
-                # segment.peaks.append(i)
-
-        for amplitude in sorted(peak_dict, reverse=True):
-            add_peak = True
-            # print(amplitude)
-            # print(peak_dict[amplitude])
-            for peak in segment.peaks:
-                if np.abs(peak_dict[amplitude] - peak) <= max_cluster_deviaion:
-                    add_peak = False
-            if add_peak:
-                if len(segment.peaks) < 3:
-                    segment.peaks.append(peak_dict[amplitude])
+                peak_dict[i] = fft_res[i]
+        peaks = get_clustered_peaks(peak_dict)
+        for amplitude in sorted(peaks, reverse=True):
+            if len(segment.peaks) < 3:
+                segment.peaks.append(peaks[amplitude])
         if start == 0:
             last_segment = segment
         if last_segment.__eq__(segment):
@@ -161,12 +197,12 @@ def music(a_reference, file):
 
 def print_segment(segment, a_reference):
     if len(segment.peaks) > 0:
-        if segment.start_time < 10.0:
-            print(str(0), end='')
-        print(segment.start_time, '-', end='', sep='')
-        if segment.end_time < 10.0:
-            print(str(0), end='')
-        print(segment.end_time, end=' ')
+        # if segment.start_time < 10.0:
+        #     print(str(0), end='')
+        print(segment.start_time, '-', segment.end_time, end=' ', sep='')
+        # if segment.end_time < 10.0:
+        #     print(str(0), end='')
+        # print(segment.end_time, end=' ')
         for p in sorted(segment.peaks):
             print(get_tone(int(a_reference), p), end=' ')
         print()
