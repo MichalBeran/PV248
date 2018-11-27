@@ -70,8 +70,6 @@ async def get_request(url, headers, req_timeout, verify_ssl):
             async with session.get(url=url, headers=headers, allow_redirects=True) as resp:
                 print(resp)
                 print(resp.status)
-                print(resp.headers)
-                print((await resp.text()).encode())
                 res_json['code'] = resp.status
                 res_json['headers'] = dict_parser(resp.headers)
                 try:
@@ -79,7 +77,7 @@ async def get_request(url, headers, req_timeout, verify_ssl):
                 except aiohttp.client_exceptions.ContentTypeError:
                     pass
                 if 'json' not in res_json.keys():
-                    res_json['content'] = (await resp.read()).decode()
+                    res_json['content'] = await resp.text()
                 if verify_ssl:
                     ssl_json = await check_ssl(resp.url.host, resp.url.port, default_timeout)
                     for key, value in ssl_json.items():
@@ -100,13 +98,12 @@ async def post_request(url, headers, req_timeout, data_content, verify_ssl):
                 print(resp.headers)
                 res_json['code'] = resp.status
                 res_json['headers'] = dict_parser(resp.headers)
-                res_content = (await resp.read()).decode()
                 try:
                     res_json['json'] = await resp.json()
                 except aiohttp.client_exceptions.ContentTypeError:
                     pass
                 if 'json' not in res_json.keys():
-                    res_json['content'] = (await resp.read()).decode()
+                    res_json['content'] = await resp.text()
                 if verify_ssl:
                     ssl_json = await check_ssl(resp.url.host, resp.url.port, default_timeout)
                     for key, value in ssl_json.items():
@@ -124,8 +121,9 @@ async def handle_get(request):
     print(result)
     del result['Host']
     print('headers', result)
-    print('url:', get_url(upstream))
-    response_result = await get_request(url=get_url(upstream), headers=result, req_timeout=default_timeout, verify_ssl=False)
+    url, https = get_url(upstream)
+    print('url:', url)
+    response_result = await get_request(url=url, headers=result, req_timeout=default_timeout, verify_ssl=False)
     return response_result
 
 
