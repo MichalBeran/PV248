@@ -53,10 +53,10 @@ async def check_ssl(url_host, url_port):
         res_json['certificate valid'] = False
     except ssl.SSLError as e:
         # print('SSL ERROR', e.filename, '|', e.filename2, '|', e.library, '|', e.strerror)
-        pass
+        return {}
     except Exception as e:
         # print('unknown ERROR', e)
-        pass
+        return {}
 
     cert = wrappedSocket.getpeercert()
     issued_to = []
