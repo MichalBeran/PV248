@@ -39,7 +39,6 @@ def get_url(url_string, default_method='http'):
 
 # check if invalid or no cert at all - ex http
 async def check_ssl(url_host, url_port):
-    print('ssl port', url_port)
     res_json = {}
     ssl_context = ssl.create_default_context()
     # ssl_context.check_hostname = False
@@ -50,21 +49,19 @@ async def check_ssl(url_host, url_port):
     try:
         wrappedSocket.connect((url_host, url_port))
     except ssl.CertificateError:
-        print('SSL CERT ERROR')
+        # print('SSL CERT ERROR')
         res_json['certificate valid'] = False
     except ssl.SSLError as e:
-        print('SSL ERROR', e.filename, '|', e.filename2, '|', e.library, '|', e.strerror)
-        print(type(e).__name__,)
+        # print('SSL ERROR', e.filename, '|', e.filename2, '|', e.library, '|', e.strerror)
         pass
     except Exception as e:
-        print('unknown ERROR', e)
+        # print('unknown ERROR', e)
         pass
 
     cert = wrappedSocket.getpeercert()
     issued_to = []
     for altName in cert['subjectAltName']:
         issued_to.append(altName[1])
-    print('issued to', issued_to)
     res_json['certificate valid'] = True
     res_json['certificate for'] = issued_to
     wrappedSocket.close()
@@ -77,8 +74,6 @@ async def get_request(url, headers, req_timeout):
     async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=req_timeout), connector=conn) as session:
         try:
             async with session.get(url=url, headers=headers, allow_redirects=True) as resp:
-                print(resp)
-                print(resp.status)
                 res_json['code'] = resp.status
                 res_json['headers'] = dict_parser(resp.headers)
                 try:
@@ -104,9 +99,6 @@ async def post_request(url, headers, req_timeout, data_content):
     async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=req_timeout), connector=conn) as session:
         try:
             async with session.post(url=url, headers=headers, data=data_content, allow_redirects=True) as resp:
-                print(resp)
-                print(resp.status)
-                print(resp.headers)
                 res_json['code'] = resp.status
                 res_json['headers'] = dict_parser(resp.headers)
                 try:
@@ -128,27 +120,25 @@ async def post_request(url, headers, req_timeout, data_content):
 
 @asyncio.coroutine
 async def handle_get(request):
-    print(request.headers)
-    print(await request.read())
+    # print(request.headers)
+    # print(await request.read())
     result = dict_parser(request.headers)
-    print(result)
     del result['Host']
-    print('headers', result)
+    # print('headers', result)
     url, https = get_url(upstream)
-    print('url:', url)
     response_result = await get_request(url=url, headers=result, req_timeout=default_timeout)
     return response_result
 
 
 @asyncio.coroutine
 async def handle_post(request):
-    print(request.headers)
-    print(request.method)
-    print('request', (await request.read()).decode())
+    # print(request.headers)
+    # print(request.method)
+    # print('request', (await request.read()).decode())
     con = (await request.read()).decode()
     try:
         json_content = json.loads(con)
-    except:
+    except Exception:
         return return_invalid_json()
 
     if "type" not in json_content:
@@ -169,10 +159,9 @@ async def handle_post(request):
         timeout = default_timeout
     else:
         timeout = json_content['timeout']
-    print('content url', json_content['url'])
-    print(await request.read())
+    # print('content url', json_content['url'])
+    # print(await request.read())
     url = get_url(json_content['url'])
-    print("parsed url", url)
     if json_content['type'] == 'GET':
         return await get_request(url, headers, timeout)
     elif json_content['type'] == 'POST':
