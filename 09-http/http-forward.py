@@ -170,8 +170,8 @@ async def handle_post(request):
 
 def aio_server(port):
     app = web.Application()
-    app.router.add_route('GET', '/', handle_get)
-    app.router.add_route('POST', '/', handle_post)
+    app.router.add_route('GET', '/{tail:.*}', handle_get)
+    app.router.add_route('POST', '/{tail:.*}', handle_post)
 
     web.run_app(app, host='localhost', port=port)
 
