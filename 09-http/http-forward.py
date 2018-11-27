@@ -3,6 +3,7 @@
 import sys
 import json
 import ssl
+import socket
 import aiohttp
 from aiohttp import web
 import asyncio
@@ -18,6 +19,7 @@ def return_invalid_json():
     result_json['code'] = 'invalid json'
     return web.json_response(data=result_json)
 
+
 def dict_parser(multi_dict):
     result = {}
     for k, v in multi_dict.items():
@@ -26,35 +28,38 @@ def dict_parser(multi_dict):
 
 
 def get_url(url_string, default_method='http'):
+    https = False
     result = urlparse(url_string, scheme=default_method)
     if result.netloc == '':
         result = urlparse('//' + url_string, scheme=default_method)
-    return result.geturl()
+    if result.scheme == 'https':
+        https = True
+        print('HTTPS')
+    return result.geturl(), https
 
 
-async def check_ssl(url, headers):
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = True
-    ssl_context.verify_mode = ssl.CERT_REQUIRED
-    conn = aiohttp.TCPConnector(ssl_context=ssl_context)
+async def check_ssl(url_host, url_port, timeout):
     res_json = {}
-
-    async with aiohttp.ClientSession(connector=conn) as session:
-        try:
-            async with session.head(url=url, headers=headers, allow_redirects=True) as resp:
-                print(resp)
-                print(resp.status)
-                print(resp.headers)
-                print((await resp.text()).encode())
-        except asyncio.TimeoutError:
-            res_json['code'] = 'timeout'
-        except ssl.SSLError:
-            res_json['valid'] = False
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_REQUIRED
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(timeout)
+    wrappedSocket = ssl_context.wrap_socket(sock)
+    try:
+        wrappedSocket.connect((url_host, url_port))
+    except:
+        res_json['certificate valid'] = False
+    else:
+        pem_cert = ssl.DER_cert_to_PEM_cert(wrappedSocket.getpeercert(True))
+        cert = wrappedSocket.getpeercert()
+        subject = dict(x[0] for x in cert['subject'])
+        issued_to = subject['commonName']
+        print('issued to', issued_to)
+        res_json['certificate valid'] = True
+        res_json['certificate for'] = issued_to
+    wrappedSocket.close()
     return res_json
-    # res = http.client.HTTPSConnection(host=url, port=443, context = ssl_context)
-    #
-    # print(res._check_hostname)
-    # print('check', res)
 
 
 async def get_request(url, headers, req_timeout, verify_ssl):
@@ -75,12 +80,16 @@ async def get_request(url, headers, req_timeout, verify_ssl):
                     pass
                 if 'json' not in res_json.keys():
                     res_json['content'] = (await resp.read()).decode()
+                if verify_ssl:
+                    ssl_json = await check_ssl(resp.url.host, resp.url.port, default_timeout)
+                    for key, value in ssl_json.items():
+                        res_json[key] = value
         except asyncio.TimeoutError:
             res_json['code'] = 'timeout'
     return web.json_response(data=res_json)
 
 
-async def post_request(url, headers, req_timeout, data_content):
+async def post_request(url, headers, req_timeout, data_content, verify_ssl):
     res_json = {}
     conn = aiohttp.TCPConnector(verify_ssl=False)
     async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=req_timeout), connector=conn) as session:
@@ -98,6 +107,10 @@ async def post_request(url, headers, req_timeout, data_content):
                     pass
                 if 'json' not in res_json.keys():
                     res_json['content'] = (await resp.read()).decode()
+                if verify_ssl:
+                    ssl_json = await check_ssl(resp.url.host, resp.url.port, default_timeout)
+                    for key, value in ssl_json.items():
+                        res_json[key] = value
         except asyncio.TimeoutError:
             res_json['code'] = 'timeout'
     return web.json_response(data=res_json)
@@ -147,16 +160,12 @@ async def handle_post(request):
         timeout = json_content['timeout']
     print('content url', json_content['url'])
     print(await request.read())
-    url = get_url(json_content['url'])
+    url, verify_ssl = get_url(json_content['url'])
     print("parsed url", url)
-    verify_ssl = False
-    # if url.scheme == 'https':
-    #     verify_ssl = True
-    #     await check_ssl(content['url'], None)
     if json_content['type'] == 'GET':
-        return await get_request(url, headers, timeout, verify_ssl=False)
+        return await get_request(url, headers, timeout, verify_ssl=verify_ssl)
     elif json_content['type'] == 'POST':
-        return await post_request(url, headers, timeout, json_content['content'])
+        return await post_request(url, headers, timeout, json_content['content'], verify_ssl=verify_ssl)
     else:
         return web.Response(text="INVALID REQUEST", status=400)
 
@@ -165,15 +174,6 @@ def aio_server(port):
     app = web.Application()
     app.router.add_route('GET', '/', handle_get)
     app.router.add_route('POST', '/', handle_post)
-
-    # loop = asyncio.get_event_loop()
-    # f = loop.create_server(app.make_handler(), '127.0.0.1', port)
-    # srv = loop.run_until_complete(f)
-    # print('serving on', srv.sockets[0].getsockname())
-    # try:
-    #     loop.run_forever()
-    # except KeyboardInterrupt:
-    #     pass
 
     web.run_app(app, host='localhost', port=port)
 
