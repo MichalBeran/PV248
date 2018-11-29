@@ -125,7 +125,7 @@ async def handle_get(request):
     result = dict_parser(request.headers)
     del result['Host']
     # print('headers', result)
-    url, https = get_url(upstream)
+    url = get_url(upstream)
     response_result = await get_request(url=url, headers=result, req_timeout=default_timeout)
     return response_result
 
