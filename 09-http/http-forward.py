@@ -125,7 +125,9 @@ async def handle_get(request):
     result = dict_parser(request.headers)
     del result['Host']
     # print('headers', result)
-    url = get_url(upstream)
+    # url = get_url(upstream)
+    url = str(request.url.with_host(upstream).with_port(80))
+    print(url)
     response_result = await get_request(url=url, headers=result, req_timeout=default_timeout)
     return response_result
 
@@ -162,6 +164,7 @@ async def handle_post(request):
     # print('content url', json_content['url'])
     # print(await request.read())
     url = get_url(json_content['url'])
+    print(url)
     if json_content['type'] == 'GET':
         return await get_request(url, headers, timeout)
     elif json_content['type'] == 'POST':
