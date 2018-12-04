@@ -143,12 +143,14 @@ async def handle_post(request):
         return return_invalid_json()
 
     if "type" not in json_content:
-        return return_invalid_json()
+        request_type = 'GET'
     elif json_content['type'] != 'GET' and json_content['type'] != 'POST':
         return return_invalid_json()
+    else:
+        request_type = json_content['type']
     if "url" not in json_content:
         return return_invalid_json()
-    if json_content['type'] == 'POST':
+    if request_type == 'POST':
         if "content" not in json_content:
             return return_invalid_json()
     if "headers" not in json_content:
@@ -163,9 +165,9 @@ async def handle_post(request):
     # print('content url', json_content['url'])
     # print(await request.read())
     url = get_url(json_content['url'])
-    if json_content['type'] == 'GET':
+    if request_type == 'GET':
         return await get_request(url, headers, timeout)
-    elif json_content['type'] == 'POST':
+    elif request_type == 'POST':
         return await post_request(url, headers, timeout, json_content['content'])
     else:
         return web.Response(text="INVALID REQUEST", status=400)
