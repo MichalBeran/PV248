@@ -144,10 +144,11 @@ async def handle_post(request):
 
     if "type" not in json_content:
         request_type = 'GET'
-    elif json_content['type'] != 'GET' and json_content['type'] != 'POST':
-        return return_invalid_json()
     else:
         request_type = json_content['type']
+
+    if request_type != 'GET' and request_type != 'POST':
+        return return_invalid_json()
     if "url" not in json_content:
         return return_invalid_json()
     if request_type == 'POST':
