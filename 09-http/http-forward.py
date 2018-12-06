@@ -77,7 +77,7 @@ async def get_request(url, headers, req_timeout):
                 res_json['code'] = resp.status
                 res_json['headers'] = dict_parser(resp.headers)
                 try:
-                    res_json['json'] = await resp.json()
+                    res_json['json'] = await resp.json(content_type=None)
                 except aiohttp.client_exceptions.ContentTypeError:
                     pass
                 if 'json' not in res_json.keys():
@@ -102,7 +102,7 @@ async def post_request(url, headers, req_timeout, data_content):
                 res_json['code'] = resp.status
                 res_json['headers'] = dict_parser(resp.headers)
                 try:
-                    res_json['json'] = await resp.json()
+                    res_json['json'] = await resp.json(content_type=None)
                 except aiohttp.client_exceptions.ContentTypeError:
                     pass
                 if 'json' not in res_json.keys():
