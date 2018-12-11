@@ -21,7 +21,8 @@ async def handle_get_request(request):
         if system_path.endswith(".cgi"):
             data = await asyncio.create_subprocess_shell(system_path, stdout=asyncio.subprocess.PIPE)
             output = await data.stdout.read()
-            return web.Response(text=output.decode())
+            parsed = output.decode().split("\n\n")
+            return web.Response(text=parsed[1])
         else:
             data = await asyncio.create_subprocess_shell("cat " + system_path, stdout=asyncio.subprocess.PIPE)
             output = await data.stdout.read()
@@ -41,7 +42,7 @@ async def handle_post_request(request):
         if system_path.endswith(".cgi"):
             data = await asyncio.create_subprocess_shell(system_path, stdin=body, stdout=asyncio.subprocess.PIPE)
             output = await data.stdout.read()
-            parsed = output.decode().split('\n\n')
+            parsed = output.decode().split("\n\n")
             return web.Response(text=parsed[1])
         else:
             data = await asyncio.create_subprocess_shell("cat " + system_path, stdout=asyncio.subprocess.PIPE)
