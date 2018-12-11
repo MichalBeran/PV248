@@ -91,7 +91,6 @@ class GameBoard:
             for j in range(0, 3):
                 if self.board[i][j] == 0:
                     return True
-        print(i, j)
         return False
 
     def get_winner(self):
