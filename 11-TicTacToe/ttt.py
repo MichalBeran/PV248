@@ -117,7 +117,7 @@ async def handle_start(request):
         # error['error'] = 'request does not contain name parameter'
         # return web.json_response(status=404, data=error)
     json = {}
-    json['id'] = str(allGames.new_game(name))
+    json['id'] = int(allGames.new_game(name))
     return web.json_response(status=200, data=json)
 
 
