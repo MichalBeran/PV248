@@ -491,7 +491,7 @@ def gui_click_board():
     (mouseX, mouseY) = pygame.mouse.get_pos()
     (row, col) = position_on_board(mouseX, mouseY)
     if game_info.winner is None:
-        sync_wait(make_move(row, col))
+        sync_wait(make_move(col, row))
     else:
         game_info.reset_game()
 
