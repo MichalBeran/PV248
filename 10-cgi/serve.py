@@ -26,6 +26,11 @@ async def handle_get_request(request):
                 content_type = ''
             else:
                 content_type = request.content_type
+
+            for header in request.headers:
+                header_name = header.upper().replace('-', '_')
+                os.putenv('HTTP_' + header_name, request.headers[header])
+
             os.putenv('AUTH_TYPE', auth_type)
             os.putenv('CONTENT_TYPE', content_type)
             os.putenv('GATEWAY_INTERFACE', 'CGI/1.1')
