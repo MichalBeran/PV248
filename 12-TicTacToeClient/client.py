@@ -3,11 +3,8 @@
 import sys
 import aiohttp
 import asyncio
-# import pygame
 import pygame
 from pygame.locals import *
-# import over limit
-# from aioconsole import ainput
 
 
 class GameInfo:
@@ -56,12 +53,6 @@ def sync_wait(task, loop=None):
 async def draw_board():
     global game_info
     await get_status()
-    if game_info.next_player != game_info.selected_player:
-        if not game_info.player_waiting:
-            print('waiting for other player')
-            game_info.player_waiting = True
-    else:
-        game_info.player_waiting = False
     if len(game_info.board) > 0:
         for i in range(0, len(game_info.board)):
             for j in range(0, len(game_info.board[0])):
@@ -73,6 +64,12 @@ async def draw_board():
                     print('_', end='')
             print(end='\n')
         await asyncio.sleep(1)
+    if game_info.next_player != game_info.selected_player:
+        if not game_info.player_waiting:
+            print('waiting for other player')
+            game_info.player_waiting = True
+    else:
+        game_info.player_waiting = False
 
 
 async def get_status():
@@ -195,11 +192,11 @@ async def text_loop():
     while game_info.selected_game_id is None:
         try:
             games = await get_games()
-            print('Type new to start a new game or type id of selected game to join the game')
+            print('Type new to start a new game or type id of selected game to join')
             if len(games) > 0:
                 print('Select game to join:')
                 for item in games:
-                    print('ID: ' + str(item['id']) + ' - ' + item['name'])
+                    print(str(item['id']) + ' ' + item['name'])
             else:
                 print('no games to join')
             input_string = input()

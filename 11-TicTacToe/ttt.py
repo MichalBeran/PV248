@@ -57,11 +57,11 @@ class GameBoard:
             elif self.winner is not None:
                 return False, "Game is over"
             else:
-                if int(x) > len(self.board[0]) - 1 or int(y) > len(self.board) - 1:
+                if int(y) > len(self.board[0]) - 1 or int(x) > len(self.board) - 1:
                     return False, "Out of range"
                 else:
-                    if self.board[int(x)][int(y)] == 0:
-                        self.board[int(x)][int(y)] = int(player)
+                    if self.board[int(y)][int(x)] == 0:
+                        self.board[int(y)][int(x)] = int(player)
                         if int(player) == 2:
                             self.waiting_for_player = False
                         if self.player_win_check(player):
